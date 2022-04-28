@@ -2,6 +2,7 @@ const axios = require("axios");
 const Cache = require("memory-cache");
 // 암호화 라이브러리
 const CryptoJS = require("crypto-js");
+require("dotenv").config();
 
 const date = Date.now().toString();
 const uri = process.env.SERVICE_ID;
@@ -28,6 +29,7 @@ const hash = hmac.finalize();
 const signature = hash.toString(CryptoJS.enc.Base64);
 
 exports.send = async function (req, res) {
+  // console.log(req.body.phoneNumber);
   const phoneNumber = req.body.phoneNumber;
 
   Cache.del(phoneNumber);

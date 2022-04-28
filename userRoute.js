@@ -1,4 +1,4 @@
-const user = require("./userController");
+const user = require("./userController.js");
 const express = require("express");
 
 const app = express();
