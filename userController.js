@@ -29,15 +29,16 @@ const hash = hmac.finalize();
 const signature = hash.toString(CryptoJS.enc.Base64);
 
 exports.send = async function (req, res) {
-  // console.log(req.body.phoneNumber);
   const phoneNumber = req.body.phoneNumber;
-
-  Cache.del(phoneNumber);
 
   //인증번호 생성
   const verifyCode = Math.floor(Math.random() * (999999 - 100000)) + 100000;
 
-  Cache.put(phoneNumber, verifyCode.toString());
+  Cache.put("phoneNumber", phoneNumber);
+  Cache.put("verifyCode", verifyCode.toString());
+
+  console.log("@@@@@@", Cache.get("phoneNumber"));
+  console.log("@@@@@@", Cache.get("verifyCode"));
 
   axios({
     method: method,
@@ -53,7 +54,7 @@ exports.send = async function (req, res) {
       type: "SMS",
       contentType: "COMM",
       countryCode: "82",
-      from: "01012341234",
+      from: "01096227437", // 발신자 번호
       content: `[식스티헤르츠] 인증번호 [${verifyCode}]를 입력해주세요.`,
       messages: [
         {
@@ -62,28 +63,39 @@ exports.send = async function (req, res) {
       ],
     },
   })
-    .then(function (res) {
-      res.send(response(baseResponse.SMS_SEND_SUCCESS));
+    .then((db) => {
+      res.send("성공하였습니다.");
     })
     .catch((err) => {
       if (err.res == undefined) {
-        res.send(response(baseResponse.SMS_SEND_SUCCESS));
+        res.send("실패하였습니다.");
       } else res.sned(errResponse(baseResponse.SMS_SEND_FAILURE));
     });
+};
+
+const handleDelVerify = () => {
+  Cache.del("phoneNumber");
+  Cache.del("verifyCode");
 };
 
 exports.verify = async function (req, res) {
   const phoneNumber = req.body.phoneNumber;
   const verifyCode = req.body.verifyCode;
 
-  const CacheData = Cache.get(phoneNumber);
+  const CachePhoneNum = Cache.get("phoneNumber");
+  const CacheCode = Cache.get("verifyCode");
 
-  if (!CacheData) {
-    return res.send(errResponse(baseResponse.FAILURE_SMS_AUTHENTICATION));
-  } else if (CacheData !== verifyCode) {
-    return res.send(errResponse(baseResponse.FAILURE_SMS_AUTHENTICATION));
+  console.log("서버 결과", CachePhoneNum);
+  console.log("서버 결과", CacheCode);
+  console.log("이용자 입력란", phoneNumber);
+  console.log("이용자 입력란", verifyCode);
+
+  if (!CachePhoneNum) {
+    return res.send("휴대폰 번호 인식이 되지 않습니다.");
+  } else if (CacheCode !== verifyCode) {
+    return res.send("인증번호가 틀립니다.");
   } else {
-    Cache.del(phoneNumber);
-    return res.send(response(baseResponse.SMS_VERIFY_SUCCESS));
+    handleDelVerify();
+    return res.send("인증번호 성립 완료하였습니다.");
   }
 };

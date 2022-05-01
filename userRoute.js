@@ -3,6 +3,10 @@ const express = require("express");
 
 const app = express();
 
+var bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 app.listen(3000, () => {
   //포트번호 3000으로 서버 구동
   console.log("서버 시작 주소: http:localhost:3000");
