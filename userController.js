@@ -37,7 +37,7 @@ exports.send = async function (req, res) {
   Cache.put("phoneNumber", phoneNumber);
   Cache.put("verifyCode", verifyCode.toString());
 
-  console.log("@@@@@@", Cache.get("phoneNumber123"));
+  console.log("@@@@@@", Cache.get("phoneNumber12345"));
   console.log("@@@@@@", Cache.get("verifyCode"));
 
   axios({
